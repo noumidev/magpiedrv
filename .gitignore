@@ -1,0 +1,13 @@
+# Object files
+*.o
+
+# Executables
+*.elf
+*.pbp
+*.prx
+
+# VS Code
+.cache
+.vscode
+
+.DS_Store
