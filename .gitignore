@@ -6,6 +6,8 @@
 *.pbp
 *.prx
 
+*.sfo
+
 # VS Code
 .cache
 .vscode
