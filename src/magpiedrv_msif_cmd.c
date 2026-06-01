@@ -272,13 +272,8 @@ int magpiedrv_msif_ReadStatusReg(u8* buf) {
 
         magpiedrv_msif_SetCommand(MAGPIEDRV_MSIF_COMMAND_READ_STATUS, 1, true);
 
-        u32 data = magpiedrv_msif_GetData();
-
-        memcpy(&buf[0], &data, sizeof(data));
-
-        data = magpiedrv_msif_GetData();
-
-        memcpy(&buf[4], &data, sizeof(data));
+        MAGPIEDRV_WRITE_U32(&buf[0], magpiedrv_msif_GetData());
+        MAGPIEDRV_WRITE_U32(&buf[4], magpiedrv_msif_GetData());
 
         if (magpiedrv_msif_WaitCommand(false) == (int)SCE_KERNEL_ERROR_WAIT_TIMEOUT) {
             return MAGPIEDRV_ERROR_TIMEOUT;
