@@ -6,6 +6,7 @@
 3. Upload ARM payload with `magpiedrv_UploadFirmware`
 
 # To-dos
+- Add more features, this is very barebones atm
 - Improve stability
 - Figure out all Memory Stick I/F internal registers
 - Add documentation, make this user-friendlier
