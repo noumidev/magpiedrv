@@ -124,4 +124,6 @@ void magpiedrv_ResumeInterrupts(const u32 intr_state);
 int magpiedrv_Initialize(void);
 int magpiedrv_InitializeInterface(void);
 int magpiedrv_InitializeMagpie(void);
+u32 magpiedrv_GetFirmwareSize(const u32 len);
+void magpiedrv_MakeFirmware(const u32 len, const u32 addr, u8* buf, u32* out_len, u8* out);
 int magpiedrv_UploadFirmware(const u32 len, u8* buf);
