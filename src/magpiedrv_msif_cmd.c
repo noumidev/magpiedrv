@@ -53,25 +53,19 @@ void magpiedrv_msif_ClearControl(const u32 val) {
     }
 }
 
+static int WaitControl(void) {
+    const u32 control = magpiedrv_msif_GetControl();
+
+    // Check if MS I/F is ready to receive data
+    if ((control & MSIF1_CONTROL_FIFO_CLEAR) == 0) {
+        return MAGPIEDRV_ERROR_OK;
+    }
+
+    return MAGPIEDRV_ERROR_TIMEOUT;
+}
+
 int magpiedrv_msif_WaitControl(void) {
-    int retries = 0;
-
-    for (; retries < MAGPIEDRV_MSIF_STATUS_RETRIES; retries++) {
-        const u32 control = magpiedrv_msif_GetControl();
-
-        // Check if MS I/F is ready to receive data
-        if ((control & MSIF1_CONTROL_FIFO_CLEAR) == 0) {
-            break;
-        }
-
-        sceKernelDelayThread(10000);
-    }
-
-    if (retries == MAGPIEDRV_MSIF_STATUS_RETRIES) {
-        return MAGPIEDRV_ERROR_TIMEOUT;
-    }
-
-    return MAGPIEDRV_ERROR_OK;
+    return MAGPIEDRV_RETRY_ON_ERROR(WaitControl(), MAGPIEDRV_MSIF_STATUS_RETRIES, 10000);;
 }
 
 void magpiedrv_msif_SetDmaFlags(const u32 val) {
@@ -127,22 +121,22 @@ void magpiedrv_msif_SetCommand(const u32 command, const u32 len, const bool is_r
     }
 }
 
+static int WaitCommand(void) {
+    const u32 status = magpiedrv_msif_GetStatus();
+
+    if ((status & MSIF1_STATUS_READY) != 0) {
+        return MAGPIEDRV_ERROR_OK;
+    }
+
+    return MAGPIEDRV_ERROR_TIMEOUT;
+}
+
 int magpiedrv_msif_WaitCommand(const bool no_event) {
     int retval;
 
     if (no_event) {
         // Wait for READY flag without event flag
-        for (int retries = 0; retries < MAGPIEDRV_MSIF_STATUS_RETRIES; retries++) {
-            const u32 status = magpiedrv_msif_GetStatus();
-
-            if ((status & MSIF1_STATUS_READY) != 0) {
-                return MAGPIEDRV_ERROR_OK;
-            }
-
-            sceKernelDelayThread(10000);
-        }
-
-        retval = MAGPIEDRV_ERROR_TIMEOUT;
+        retval = MAGPIEDRV_RETRY_ON_ERROR(WaitCommand(), MAGPIEDRV_MSIF_STATUS_RETRIES, 10000);
     } else {
         const u32 status = magpiedrv_msif_GetStatus();
 
