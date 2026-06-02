@@ -103,7 +103,15 @@ static void kmain(void) {
 
     print("Magpie init successful\n");
 
-    if (retval = magpiedrv_UploadFirmware(sizeof(PAYLOAD), PAYLOAD), retval < 0) {
+    // Make firmware image
+    u8 firm_buf[0x1000];
+    u32 firm_len;
+
+    magpiedrv_MakeFirmware(sizeof(PAYLOAD), 0, PAYLOAD, &firm_len, firm_buf);
+
+    MAGPIEDRV_ASSERT_OK(firm_len == magpiedrv_GetFirmwareSize(sizeof(PAYLOAD)));
+
+    if (retval = magpiedrv_UploadFirmware(firm_len, firm_buf), retval < 0) {
         print("Failed to upload firmware: %d\n", retval);
         goto KMAIN_END;
     }
