@@ -5,6 +5,7 @@
 
 /* example.c - Usage example */
 
+#include <stdio.h>
 #include <string.h>
 
 #include <pspsdk.h>
@@ -72,6 +73,36 @@ static u32 get_hif_comm(void) {
     return MAGPIEDRV_READ_U32_SWAP(buf.bytes);
 }
 
+static void DumpToFile(const u32 len, const u32 addr, const char* path) {
+    u8 buf[0x200];
+
+    FILE* file;
+
+    print("Dumping \"%s\"... ", path);
+
+    file = fopen(path, "w+b");
+
+    MAGPIEDRV_ASSERT_OK(file != NULL);
+
+    for (u32 i = 0; i < len; i += 0x200) {
+        magpiedrv_msif_ReceivePacketCis(sizeof(buf), i + addr, (u8*)buf);
+
+        fwrite(buf, sizeof(u8), sizeof(buf), file);
+    }
+
+    fclose(file);
+
+    print("done\n");
+}
+
+static int WaitNotification(void) {
+    if (get_hif_comm() == 0xCAFE) {
+        return MAGPIEDRV_ERROR_OK;
+    }
+
+    return MAGPIEDRV_ERROR_TIMEOUT;
+}
+
 static void kmain(void) {
     const int k1 = pspSdkSetK1(0);
     const int user_level = pspXploitSetUserLevel(8);
@@ -118,15 +149,14 @@ static void kmain(void) {
 
     sceKernelDelayThread(1000);
 
-    // Should print "04030201"
-    print("%08lX\n", get_hif_comm());
-
-    char msg[32];
-
-    magpiedrv_msif_ReceivePacketCis(sizeof(msg), 0, (u8*)msg);
-
-    // Should print "Hello, Magpie!"
-    print("%s", msg);
+    // Wait for notification from ARM
+    if (MAGPIEDRV_RETRY_ON_ERROR(WaitNotification(), 128, 10000) == MAGPIEDRV_ERROR_OK) {
+        print("%08lX\n", get_hif_comm());
+    
+        DumpToFile(0x8000, 0, "boot_rom.bin");
+    } else {
+        print("ARM timed out\n");
+    }
 
 KMAIN_END:
     pspXploitSetUserLevel(user_level);
