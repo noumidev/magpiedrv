@@ -97,7 +97,7 @@ static int GetPayloadLength(u16* len, int retries, const u32 timeout) {
 
     magpiedrv_Buffer buf;
 
-    for (; retries > 0; retries++) {
+    for (; retries > 0; retries--) {
         sceKernelDelayThread(timeout);
 
         if (magpiedrv_msif_ReadReg(0x4C, 2, buf.bytes) < 0) {
