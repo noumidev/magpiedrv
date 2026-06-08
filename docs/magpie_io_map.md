@@ -10,6 +10,8 @@
 | INTC  | `0x9000_8000` | `0x9000_800F`
 | TIMER | `0x9000_9000` | `0x9000_902B`?
 
+All registers *should* be accessible via both the `0x8xxx_xxxx` and `0x9xxx_xxxx` ranges, however official Magpie software accesses them through only one of the two mirrors.
+
 ## Host interface
 
 | Register       | Address       | MS I/F register | Size
@@ -78,4 +80,4 @@ Writing `1` to a bit in `INTC_ACK` clears the corresponding bits in `INTC_FLAGS`
 | `TIMER_INTFLAGS`   | `0x9000_9024`      | 32-bit?
 | `TIMER_INTMASK`    | `0x9000_9028`      | 32-bit?
 
-There *should* be four timers, but seemingly only one works. The `TIMERn_COUNTER` also don't appear to be working.
+There *should* be four timers, but seemingly only one works. The `TIMERn_COUNTER` registers also don't appear to be working.
